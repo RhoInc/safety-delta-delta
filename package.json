@@ -23,7 +23,8 @@
     "webcharts": "^1.11.6"
   },
   "scripts": {
-    "build": "npm audit fix && npm run bundle && npm run format && npm run build-wiki && npm run check-settings-schema",
+    "build": "npm audit fix && npm run bundle && npm run format",
+    "build-all": "npm audit fix && npm run bundle && npm run format && npm run build-wiki && npm run check-settings-schema",
     "build-wiki": "npm run build-configuration-wiki && npm run build-data-guidelines-wiki",
     "build-configuration-wiki": "node ./scripts/build-configuration-wiki.js",
     "build-data-guidelines-wiki": "node ./scripts/build-data-guidelines-wiki.js",
@@ -31,7 +32,7 @@
     "check-settings-schema": "node ./scripts/check-settings-schema.js",
     "format": "npm run format-src && npm run format-bundle",
     "format-src": "prettier --print-width=100 --tab-width=4 --single-quote --write \"./src/**/*.js\"",
-    "format-bundle": "prettier --print-width=100 --tab-width=4 --single-quote --write ./safetyHistogram.js",
+    "format-bundle": "prettier --print-width=100 --tab-width=4 --single-quote --write ./safetyDeltaDelta.js",
     "test-page": "start chrome ./test-page/index.html && start firefox ./test-page/index.html && start iexplore file://%CD%/test-page/index.html",
     "watch": "rollup -c -w"
   },
