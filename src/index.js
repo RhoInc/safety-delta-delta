@@ -4,6 +4,10 @@ import configuration from './configuration/index';
 import { createChart, createControls, createTable } from 'webcharts';
 import callbacks from './callbacks/index';
 
+//layout and styles
+import defineLayout from './configuration/defineLayout';
+import defineStyles from './configuration/defineStyles';
+
 export default function safetyHistogram(element = 'body', settings = {}) {
     //Define chart.
     const mergedSettings = Object.assign(
@@ -25,6 +29,15 @@ export default function safetyHistogram(element = 'body', settings = {}) {
     //Define chart callbacks.
     for (const callback in callbacks)
         chart.on(callback.substring(2).toLowerCase(), callbacks[callback]);
+
+    //layout and styles
+    defineLayout(element);
+    defineStyles();
+
+    //listing
+    const listing = createTable(document.querySelector(element).querySelector('#ssp-listing'), {});
+    listing.init([]);
+    chart.listing = listing;
 
     return chart;
 }

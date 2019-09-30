@@ -9,6 +9,6 @@ export default function syncControlInputs(controlInputs, settings) {
             };
             controlInputs.push(filterObj);
         });
-    }
+    } else delete settings.filters;
     return controlInputs;
 }
