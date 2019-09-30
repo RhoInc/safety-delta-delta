@@ -660,13 +660,8 @@
             .values().length;
 
         //count the number of unique ids in the current chart and calculate the percentage
-        var currentObs = chart.filtered_data.filter(function(d) {
-            return (
-                chart.x.domain()[0] <= d.shiftx &&
-                d.shiftx <= chart.x.domain()[1] &&
-                chart.y.domain()[0] <= d.shifty &&
-                d.shifty <= chart.y.domain()[1]
-            );
+        var currentObs = chart.filtered_data.filter(function(f) {
+            return !isNaN(f.delta_x) & !isNaN(f.delta_y);
         }).length;
 
         var percentage = d3$1.format('0.1%')(currentObs / totalObs);

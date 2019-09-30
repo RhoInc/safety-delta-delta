@@ -16,13 +16,8 @@ export default function updateParticipantCount(chart, selector, id_unit) {
     const totalObs = set(chart.initial_data.map(d => d[chart.config.id_col])).values().length;
 
     //count the number of unique ids in the current chart and calculate the percentage
-    const currentObs = chart.filtered_data.filter(
-        d =>
-            chart.x.domain()[0] <= d.shiftx &&
-            d.shiftx <= chart.x.domain()[1] &&
-            chart.y.domain()[0] <= d.shifty &&
-            d.shifty <= chart.y.domain()[1]
-    ).length;
+    const currentObs = chart.filtered_data.filter(f => !isNaN(f.delta_x) & !isNaN(f.delta_y))
+        .length;
 
     const percentage = format('0.1%')(currentObs / totalObs);
 
