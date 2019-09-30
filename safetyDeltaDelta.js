@@ -574,12 +574,36 @@
         updateVisitControls.call(this);
     }
 
+    function addParticipantLevelMetadata(d, participant_obj) {
+        var varList = [];
+        if (this.config.filters) {
+            var filterVars = this.config.filters.map(function(d) {
+                return d.hasOwnProperty('value_col') ? d.value_col : d;
+            });
+            varList = d3.merge([varList, filterVars]);
+        }
+        if (this.config.group_cols) {
+            var groupVars = this.config.group_cols.map(function(d) {
+                return d.hasOwnProperty('value_col') ? d.value_col : d;
+            });
+            varList = d3.merge([varList, groupVars]);
+        }
+        if (this.config.details) {
+            var detailVars = this.config.details.map(function(d) {
+                return d.hasOwnProperty('value_col') ? d.value_col : d;
+            });
+            varList = d3.merge([varList, detailVars]);
+        }
+
+        varList.forEach(function(v) {
+            participant_obj[v] = '' + d[0][v];
+        });
+    }
+
     function flattenData(rawData) {
-        console.log(rawData);
+        var chart = this;
         var config = this.config;
-        console.log(config);
-        console.log(config.visits);
-        console.log(config.measure);
+
         var nested = d3$1
             .nest()
             .key(function(d) {
@@ -608,11 +632,12 @@
                     });
                     obj['delta_' + m] = obj[m + '_comparison_value'] - obj[m + '_baseline_value'];
                 });
+
+                addParticipantLevelMetadata.call(chart, d, obj);
+
                 return obj;
             })
             .entries(rawData);
-
-        //TODO get other variables (filters, details etc)
 
         return nested.map(function(m) {
             return m.values;

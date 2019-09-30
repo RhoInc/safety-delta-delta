@@ -5,9 +5,9 @@ d3.csv(
             '#container', // element
             {
                 filters: [
-                  //  {value_col: 'ARM', label: 'Treatment Group'},
-                  //  {value_col: 'SITE', label: 'Site ID'},
-                  //  {value_col: 'USUBJID', label: 'Participant ID'},
+                    {value_col: 'ARM', label: 'Treatment Group'},
+                    {value_col: 'SITE', label: 'Site ID'},
+                    {value_col: 'USUBJID', label: 'Participant ID'},
                 ],
                 displayNormalRange: true,
             } // settings

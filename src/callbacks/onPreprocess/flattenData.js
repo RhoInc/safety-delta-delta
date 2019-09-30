@@ -1,11 +1,10 @@
 import { nest, sum, merge, max, min, format } from 'd3';
+import addParticipantLevelMetadata from './flattenData/addParticipantLevelMetadata';
 
 export default function flattenData(rawData) {
-    console.log(rawData);
+    var chart = this;
     var config = this.config;
-    console.log(config);
-    console.log(config.visits);
-    console.log(config.measure);
+
     var nested = nest()
         .key(function(d) {
             return d[config.id_col];
@@ -29,11 +28,12 @@ export default function flattenData(rawData) {
                 });
                 obj['delta_' + m] = obj[m + '_comparison_value'] - obj[m + '_baseline_value'];
             });
+
+            addParticipantLevelMetadata.call(chart, d, obj);
+
             return obj;
         })
         .entries(rawData);
-
-    //TODO get other variables (filters, details etc)
 
     return nested.map(m => m.values);
 }
