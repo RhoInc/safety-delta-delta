@@ -8,12 +8,17 @@ export default function updateControlInputs() {
     y_control.values = this.measures;
     y_control.start = this.config.measure.y;
 
-    this.controls.config.inputs.find(
+    const baseline_control = this.controls.config.inputs.find(
         input => input.option === 'visits.baseline'
-    ).values = this.visits;
-    this.controls.config.inputs.find(
+    );
+    baseline_control.values = this.visits;
+    baseline_control.start = this.config.visits.baseline;
+
+    const comparison_control = this.controls.config.inputs.find(
         input => input.option === 'visits.comparison'
-    ).values = this.visits;
+    );
+    comparison_control.values = this.visits;
+    comparison_control.start = this.config.visits.comprarison;
 
     console.log(this.controls.config.inputs);
 }

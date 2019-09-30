@@ -456,12 +456,17 @@
         y_control.values = this.measures;
         y_control.start = this.config.measure.y;
 
-        this.controls.config.inputs.find(function(input) {
+        var baseline_control = this.controls.config.inputs.find(function(input) {
             return input.option === 'visits.baseline';
-        }).values = this.visits;
-        this.controls.config.inputs.find(function(input) {
+        });
+        baseline_control.values = this.visits;
+        baseline_control.start = this.config.visits.baseline;
+
+        var comparison_control = this.controls.config.inputs.find(function(input) {
             return input.option === 'visits.comparison';
-        }).values = this.visits;
+        });
+        comparison_control.values = this.visits;
+        comparison_control.start = this.config.visits.comprarison;
 
         console.log(this.controls.config.inputs);
     }
@@ -514,11 +519,7 @@
         initCustomEvents.call(this);
     }
 
-    function onLayout() {
-        this.config.x.column = 'delta_x';
-        this.config.y.column = 'delta_y';
-        this.config.marks[0].per = ['key'];
-
+    function initNotes() {
         //Add footnote element.
         this.wrap
             .insert('p', ':first-child')
@@ -535,6 +536,42 @@
             .append('em')
             .classed('annote', true)
             .style('display', 'block');
+    }
+
+    function updateVisitControls() {
+        var _this = this;
+
+        var config = this.config;
+        var baselineSelect = this.controls.wrap
+            .selectAll('.control-group')
+            .filter(function(f) {
+                return f.option === 'visits.baseline';
+            })
+            .select('select');
+        baselineSelect
+            .selectAll('option')
+            .filter(function(f) {
+                return _this.config.visits.baseline.indexOf(f) > -1;
+            })
+            .attr('selected', 'selected');
+
+        var comparisonSelect = this.controls.wrap
+            .selectAll('.control-group')
+            .filter(function(f) {
+                return f.option === 'visits.comparison';
+            })
+            .select('select');
+        comparisonSelect
+            .selectAll('option')
+            .filter(function(f) {
+                return _this.config.visits.comparison.indexOf(f) > -1;
+            })
+            .attr('selected', 'selected');
+    }
+
+    function onLayout() {
+        initNotes.call(this);
+        updateVisitControls.call(this);
     }
 
     function flattenData(rawData) {
@@ -583,6 +620,11 @@
     }
 
     function onPreprocess() {
+        //set config properties here since they aren't available in onInit
+        this.config.x.column = 'delta_x';
+        this.config.y.column = 'delta_y';
+        this.config.marks[0].per = ['key'];
+
         this.raw_data = flattenData.call(this, this.initial_data);
         console.log(this.raw_data);
     }
@@ -840,9 +882,31 @@
         );
     }
 
+    function updateClipPath() {
+        //embiggen clip-path so points aren't clipped
+        var radius = this.config.marks.find(function(mark) {
+            return mark.type === 'circle';
+        }).radius;
+        this.svg
+            .select('.plotting-area')
+            .attr('width', this.plot_width + radius * 2 + 2) // plot width + circle radius * 2 + circle stroke width * 2
+            .attr('height', this.plot_height + radius * 2 + 2) // plot height + circle radius * 2 + circle stroke width * 2
+            .attr(
+                'transform',
+                'translate(-' +
+                    (radius + 1) + // translate left circle radius + circle stroke width
+                    ',-' +
+                    (radius + 1) + // translate up circle radius + circle stroke width
+                    ')'
+            );
+    }
+
     function onResize() {
         //Add univariate box plots to top and right margins.
         addBoxPlots.call(this);
+
+        //fix cut off points
+        updateClipPath.call(this);
     }
 
     function onDestroy() {}
