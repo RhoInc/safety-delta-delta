@@ -8,7 +8,11 @@ import callbacks from './callbacks/index';
 import defineLayout from './configuration/defineLayout';
 import defineStyles from './configuration/defineStyles';
 
-export default function safetyHistogram(element = 'body', settings = {}) {
+export default function safetyDeltaDelta(element = 'body', settings = {}) {
+    //layout and styles
+    defineLayout(element);
+    defineStyles();
+
     //Define chart.
     const mergedSettings = Object.assign(
         {},
@@ -20,22 +24,28 @@ export default function safetyHistogram(element = 'body', settings = {}) {
         configuration.controlInputs(),
         syncedSettings
     );
-    const controls = createControls(element, {
-        location: 'top',
-        inputs: syncedControlInputs
-    });
-    const chart = createChart(element, syncedSettings, controls);
+    const controls = createControls(
+        document.querySelector(element).querySelector('#sdd-controls'),
+        {
+            location: 'top',
+            inputs: syncedControlInputs
+        }
+    );
+    const chart = createChart(
+        document.querySelector(element).querySelector('#sdd-chart'),
+        syncedSettings,
+        controls
+    );
 
     //Define chart callbacks.
     for (const callback in callbacks)
         chart.on(callback.substring(2).toLowerCase(), callbacks[callback]);
 
-    //layout and styles
-    defineLayout(element);
-    defineStyles();
-
     //listing
-    const listing = createTable(document.querySelector(element).querySelector('#ssp-listing'), {});
+    const listing = createTable(
+        document.querySelector(element).querySelector('#sdd-listing'),
+        configuration.listingSettings()
+    );
     listing.init([]);
     chart.listing = listing;
 

@@ -1,5 +1,6 @@
 import { nest, sum, merge, max, min, format } from 'd3';
 import addParticipantLevelMetadata from './flattenData/addParticipantLevelMetadata';
+import getMeasureDetails from './flattenData/getMeasureDetails';
 
 export default function flattenData(rawData) {
     var chart = this;
@@ -13,21 +14,11 @@ export default function flattenData(rawData) {
             var obj = {};
             obj.key = d[0][config.id_col];
             obj.raw = d;
-            ['x', 'y'].forEach(function(m) {
-                obj[m + '_measure'] = config.measure[m];
-                const measure_values = d.filter(f => f[config.measure_col] == obj[m + '_measure']);
-                obj[m + '_measure_values'] = measure_values;
-                ['baseline', 'comparison'].forEach(function(t) {
-                    obj[m + '_' + t + '_records'] = measure_values.filter(
-                        f => config.visits[t].indexOf(f[config.visit_col]) > -1
-                    );
-                    obj[m + '_' + t + '_value'] = d3.mean(
-                        obj[m + '_' + t + '_records'],
-                        d => d[config.value_col]
-                    );
-                });
-                obj['delta_' + m] = obj[m + '_comparison_value'] - obj[m + '_baseline_value'];
-            });
+            obj.measures = getMeasureDetails.call(chart, d);
+            obj.x_details = obj.measures.find(f => f.key == config.measure.x);
+            obj.y_details = obj.measures.find(f => f.key == config.measure.y);
+            obj.delta_x = obj.x_details.delta;
+            obj.delta_y = obj.y_details.delta;
 
             addParticipantLevelMetadata.call(chart, d, obj);
 

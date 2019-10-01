@@ -10,7 +10,6 @@ export default function reset() {
         .select('.record-note')
         .style('text-align', 'center')
         .text('Click a point to see details.');
-    this.svg.select('line.identity').remove();
     this.listing.draw([]);
     this.listing.wrap.style('display', 'none');
 }

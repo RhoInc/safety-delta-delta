@@ -4,14 +4,14 @@ export default function defineLayout(element) {
     const container = select(element);
     container
         .append('div')
-        .classed('ssp-component', true)
-        .attr('id', 'ssp-controls');
+        .classed('sdd-component', true)
+        .attr('id', 'sdd-controls');
     container
         .append('div')
-        .classed('ssp-component', true)
-        .attr('id', 'ssp-chart');
+        .classed('sdd-component', true)
+        .attr('id', 'sdd-chart');
     container
         .append('div')
-        .classed('ssp-component', true)
-        .attr('id', 'ssp-listing');
+        .classed('sdd-component', true)
+        .attr('id', 'sdd-listing');
 }

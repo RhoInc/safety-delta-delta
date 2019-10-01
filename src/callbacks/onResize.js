@@ -1,5 +1,6 @@
 import addBoxPlots from './onResize/addBoxPlots';
 import updateClipPath from './onResize/updateClipPath';
+import addPointClick from './onResize/addPointClick';
 
 export default function onResize() {
     //Add univariate box plots to top and right margins.
@@ -7,4 +8,6 @@ export default function onResize() {
 
     //fix cut off points
     updateClipPath.call(this);
+
+    addPointClick.call(this);
 }

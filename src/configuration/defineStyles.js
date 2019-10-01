@@ -1,7 +1,7 @@
 export default function defineStyles() {
     const styles = [
-        '#safety-shift-plot {' + '    width: 100%;' + '    display: inline-block;' + '}',
-        '.ssp-component {' +
+        '#safety-delta-delta {' + '    width: 100%;' + '    display: inline-block;' + '}',
+        '.sdd-component {' +
             '    margin: 0;' +
             '    border: none;' +
             '    padding: 0;' +
@@ -9,25 +9,25 @@ export default function defineStyles() {
             '}',
 
         //controls
-        '#ssp-controls {' + '    width: 25%;' + '    float: left;' + '}',
-        '#ssp-controls .control-group {' +
+        '#sdd-controls {' + '    width: 25%;' + '    float: left;' + '}',
+        '#sdd-controls .control-group {' +
             '    width: 98%;' +
             '    margin: 0 2% 5px 0;' +
             '    padding: 0;' +
             '}',
-        '#ssp-controls .control-group > * {' + '    display: inline-block;' + '}',
-        '#ssp-controls .changer {' + '    float: right;' + '    width: 50%;' + '}',
-        '#ssp-controls .wc-control-label {' + '    text-align: right;' + '    width: 48%;' + '}',
-        '#ssp-controls .annote {' + '    width: 98%;' + '    text-align: right;' + '}',
+        '#sdd-controls .control-group > * {' + '    display: inline-block;' + '}',
+        '#sdd-controls .changer {' + '    float: right;' + '    width: 50%;' + '}',
+        '#sdd-controls .wc-control-label {' + '    text-align: right;' + '    width: 48%;' + '}',
+        '#sdd-controls .annote {' + '    width: 98%;' + '    text-align: right;' + '}',
 
         //chart
-        '#ssp-chart {' + '    width: 36%;' + '    margin: 0 2%;' + '}',
+        '#sdd-chart {' + '    width: 36%;' + '    margin: 0 2%;' + '}',
 
         //listing
-        '#ssp-listing {' + '    width: 35%;' + '    float: right;' + '}',
-        '#ssp-listing .wc-table table {' + '    width: 100%;' + '    display: table;' + '}',
-        '#ssp-listing .wc-table th:not(:first-child),' +
-            '#ssp-listing .wc-table td:not(:first-child) {' +
+        '#sdd-listing {' + '    width: 35%;' + '    float: right;' + '}',
+        '#sdd-listing .wc-table table {' + '    width: 100%;' + '    display: table;' + '}',
+        '#sdd-listing .wc-table th:not(:first-child),' +
+            '#sdd-listing .wc-table td:not(:first-child) {' +
             '    text-align: right;' +
             '}'
     ];

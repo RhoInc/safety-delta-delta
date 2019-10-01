@@ -313,13 +313,25 @@
         return controlInputs;
     }
 
+    function listingSettings() {
+        return {
+            cols: ['key', 'chart', 'delta'],
+            headers: ['Measure', '', 'Change over Time'],
+            searchable: false,
+            sortable: false,
+            pagination: false,
+            exportable: false
+        };
+    }
+
     var configuration = {
         rendererSettings: rendererSettings,
         webchartsSettings: webchartsSettings,
         settings: Object.assign({}, rendererSettings(), webchartsSettings()),
         syncSettings: syncSettings,
         controlInputs: controlInputs,
-        syncControlInputs: syncControlInputs
+        syncControlInputs: syncControlInputs,
+        listingSettings: listingSettings
     };
 
     function cleanData() {
@@ -600,6 +612,35 @@
         });
     }
 
+    function getMeasureDetails(pt_data) {
+        var config = this.config;
+        var measure_details = d3
+            .nest()
+            .key(function(d) {
+                return d[config.measure_col];
+            })
+            .rollup(function(di) {
+                var measure_obj = {};
+                measure_obj.key = di[0][config.measure_col];
+                measure_obj.raw = di;
+                ['baseline', 'comparison'].forEach(function(t) {
+                    measure_obj[t + '_records'] = di.filter(function(f) {
+                        return config.visits[t].indexOf(f[config.visit_col]) > -1;
+                    });
+
+                    measure_obj[t + '_value'] = d3.mean(measure_obj[t + '_records'], function(d) {
+                        return d[config.value_col];
+                    });
+                });
+                measure_obj['delta'] = measure_obj.comparison_value - measure_obj.baseline_value;
+                return measure_obj;
+            })
+            .entries(pt_data);
+        return measure_details.map(function(m) {
+            return m.values;
+        });
+    }
+
     function flattenData(rawData) {
         var chart = this;
         var config = this.config;
@@ -613,25 +654,15 @@
                 var obj = {};
                 obj.key = d[0][config.id_col];
                 obj.raw = d;
-                ['x', 'y'].forEach(function(m) {
-                    obj[m + '_measure'] = config.measure[m];
-                    var measure_values = d.filter(function(f) {
-                        return f[config.measure_col] == obj[m + '_measure'];
-                    });
-                    obj[m + '_measure_values'] = measure_values;
-                    ['baseline', 'comparison'].forEach(function(t) {
-                        obj[m + '_' + t + '_records'] = measure_values.filter(function(f) {
-                            return config.visits[t].indexOf(f[config.visit_col]) > -1;
-                        });
-                        obj[m + '_' + t + '_value'] = d3.mean(
-                            obj[m + '_' + t + '_records'],
-                            function(d) {
-                                return d[config.value_col];
-                            }
-                        );
-                    });
-                    obj['delta_' + m] = obj[m + '_comparison_value'] - obj[m + '_baseline_value'];
+                obj.measures = getMeasureDetails.call(chart, d);
+                obj.x_details = obj.measures.find(function(f) {
+                    return f.key == config.measure.x;
                 });
+                obj.y_details = obj.measures.find(function(f) {
+                    return f.key == config.measure.y;
+                });
+                obj.delta_x = obj.x_details.delta;
+                obj.delta_y = obj.y_details.delta;
 
                 addParticipantLevelMetadata.call(chart, d, obj);
 
@@ -712,7 +743,6 @@
             .select('.record-note')
             .style('text-align', 'center')
             .text('Click a point to see details.');
-        this.svg.select('line.identity').remove();
         this.listing.draw([]);
         this.listing.wrap.style('display', 'none');
     }
@@ -928,12 +958,27 @@
             );
     }
 
+    function addPointClick() {
+        var chart = this;
+        var config = this.config;
+        var points = this.marks[0].circles;
+
+        points.on('click', function(d) {
+            var point_data = d.values.raw[0];
+            console.log(point_data);
+            chart.listing.wrap.style('display', null);
+            chart.listing.draw(point_data.measures);
+        });
+    }
+
     function onResize() {
         //Add univariate box plots to top and right margins.
         addBoxPlots.call(this);
 
         //fix cut off points
         updateClipPath.call(this);
+
+        addPointClick.call(this);
     }
 
     function onDestroy() {}
@@ -952,22 +997,22 @@
         var container = d3$1.select(element);
         container
             .append('div')
-            .classed('ssp-component', true)
-            .attr('id', 'ssp-controls');
+            .classed('sdd-component', true)
+            .attr('id', 'sdd-controls');
         container
             .append('div')
-            .classed('ssp-component', true)
-            .attr('id', 'ssp-chart');
+            .classed('sdd-component', true)
+            .attr('id', 'sdd-chart');
         container
             .append('div')
-            .classed('ssp-component', true)
-            .attr('id', 'ssp-listing');
+            .classed('sdd-component', true)
+            .attr('id', 'sdd-listing');
     }
 
     function defineStyles() {
         var styles = [
-            '#safety-shift-plot {' + '    width: 100%;' + '    display: inline-block;' + '}',
-            '.ssp-component {' +
+            '#safety-delta-delta {' + '    width: 100%;' + '    display: inline-block;' + '}',
+            '.sdd-component {' +
                 '    margin: 0;' +
                 '    border: none;' +
                 '    padding: 0;' +
@@ -975,28 +1020,28 @@
                 '}',
 
             //controls
-            '#ssp-controls {' + '    width: 25%;' + '    float: left;' + '}',
-            '#ssp-controls .control-group {' +
+            '#sdd-controls {' + '    width: 25%;' + '    float: left;' + '}',
+            '#sdd-controls .control-group {' +
                 '    width: 98%;' +
                 '    margin: 0 2% 5px 0;' +
                 '    padding: 0;' +
                 '}',
-            '#ssp-controls .control-group > * {' + '    display: inline-block;' + '}',
-            '#ssp-controls .changer {' + '    float: right;' + '    width: 50%;' + '}',
-            '#ssp-controls .wc-control-label {' +
+            '#sdd-controls .control-group > * {' + '    display: inline-block;' + '}',
+            '#sdd-controls .changer {' + '    float: right;' + '    width: 50%;' + '}',
+            '#sdd-controls .wc-control-label {' +
                 '    text-align: right;' +
                 '    width: 48%;' +
                 '}',
-            '#ssp-controls .annote {' + '    width: 98%;' + '    text-align: right;' + '}',
+            '#sdd-controls .annote {' + '    width: 98%;' + '    text-align: right;' + '}',
 
             //chart
-            '#ssp-chart {' + '    width: 36%;' + '    margin: 0 2%;' + '}',
+            '#sdd-chart {' + '    width: 36%;' + '    margin: 0 2%;' + '}',
 
             //listing
-            '#ssp-listing {' + '    width: 35%;' + '    float: right;' + '}',
-            '#ssp-listing .wc-table table {' + '    width: 100%;' + '    display: table;' + '}',
-            '#ssp-listing .wc-table th:not(:first-child),' +
-                '#ssp-listing .wc-table td:not(:first-child) {' +
+            '#sdd-listing {' + '    width: 35%;' + '    float: right;' + '}',
+            '#sdd-listing .wc-table table {' + '    width: 100%;' + '    display: table;' + '}',
+            '#sdd-listing .wc-table th:not(:first-child),' +
+                '#sdd-listing .wc-table td:not(:first-child) {' +
                 '    text-align: right;' +
                 '}'
         ];
@@ -1006,9 +1051,13 @@
         document.getElementsByTagName('head')[0].appendChild(style);
     }
 
-    function safetyHistogram() {
+    function safetyDeltaDelta() {
         var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'body';
         var settings = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+        //layout and styles
+        defineLayout(element);
+        defineStyles();
 
         //Define chart.
         var mergedSettings = Object.assign(
@@ -1021,23 +1070,26 @@
             configuration.controlInputs(),
             syncedSettings
         );
-        var controls = webcharts.createControls(element, {
-            location: 'top',
-            inputs: syncedControlInputs
-        });
-        var chart = webcharts.createChart(element, syncedSettings, controls);
+        var controls = webcharts.createControls(
+            document.querySelector(element).querySelector('#sdd-controls'),
+            {
+                location: 'top',
+                inputs: syncedControlInputs
+            }
+        );
+        var chart = webcharts.createChart(
+            document.querySelector(element).querySelector('#sdd-chart'),
+            syncedSettings,
+            controls
+        );
 
         //Define chart callbacks.
         for (var callback in callbacks) {
             chart.on(callback.substring(2).toLowerCase(), callbacks[callback]);
-        } //layout and styles
-        defineLayout(element);
-        defineStyles();
-
-        //listing
+        } //listing
         var listing = webcharts.createTable(
-            document.querySelector(element).querySelector('#ssp-listing'),
-            {}
+            document.querySelector(element).querySelector('#sdd-listing'),
+            configuration.listingSettings()
         );
         listing.init([]);
         chart.listing = listing;
@@ -1045,5 +1097,5 @@
         return chart;
     }
 
-    return safetyHistogram;
+    return safetyDeltaDelta;
 });
