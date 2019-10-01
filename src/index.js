@@ -48,6 +48,7 @@ export default function safetyDeltaDelta(element = 'body', settings = {}) {
     );
     listing.init([]);
     chart.listing = listing;
+    listing.chart = chart;
 
     return chart;
 }

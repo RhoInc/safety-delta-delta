@@ -222,7 +222,6 @@
                             : filter
                     });
                 });
-        defaultDetails.push({ value_col: settings.value_col, label: 'Result' });
         if (settings.normal_col_low)
             defaultDetails.push({
                 value_col: settings.normal_col_low,
@@ -315,7 +314,7 @@
 
     function listingSettings() {
         return {
-            cols: ['key', 'chart', 'delta'],
+            cols: ['key', 'spark', 'delta'],
             headers: ['Measure', '', 'Change over Time'],
             searchable: false,
             sortable: false,
@@ -455,7 +454,6 @@
     }
 
     function updateControlInputs() {
-        console.log(this.config.measure);
         var x_control = this.controls.config.inputs.find(function(input) {
             return input.option === 'measure.x';
         });
@@ -479,8 +477,6 @@
         });
         comparison_control.values = this.visits;
         comparison_control.start = this.config.visits.comprarison;
-
-        console.log(this.controls.config.inputs);
     }
 
     function initCustomEvents() {
@@ -622,7 +618,21 @@
             .rollup(function(di) {
                 var measure_obj = {};
                 measure_obj.key = di[0][config.measure_col];
+                measure_obj.spark = 'sparkline placeholder';
+                measure_obj.toggle = '+';
                 measure_obj.raw = di;
+                measure_obj.axisFlag =
+                    measure_obj.key == config.measure.x
+                        ? 'X'
+                        : measure_obj.key == config.measure.y
+                        ? 'Y'
+                        : '';
+                measure_obj.raw.forEach(function(dii) {
+                    dii.baseline = config.visits.baseline.indexOf(dii[config.visit_col]) > -1;
+                    dii.comparison = config.visits.comparison.indexOf(dii[config.visit_col]) > -1;
+                    dii.color = dii.baseline ? 'green' : dii.comparison ? 'orange' : '#999';
+                });
+
                 ['baseline', 'comparison'].forEach(function(t) {
                     measure_obj[t + '_records'] = di.filter(function(f) {
                         return config.visits[t].indexOf(f[config.visit_col]) > -1;
@@ -636,9 +646,20 @@
                 return measure_obj;
             })
             .entries(pt_data);
-        return measure_details.map(function(m) {
-            return m.values;
-        });
+        measure_details = measure_details
+            .map(function(m) {
+                return m.values;
+            })
+            .sort(function(a, b) {
+                if (a.axisFlag == 'X') return -1;
+                else if (b.axisFlag == 'X') return 1;
+                else if (a.axisFlag == 'Y') return -1;
+                else if (b.axisFlag == 'Y') return 1;
+                else if (a.key < b.key) return -1;
+                else if (b.key > a.key) return 1;
+                else return 0;
+            });
+        return measure_details;
     }
 
     function flattenData(rawData) {
@@ -732,7 +753,6 @@
     }
 
     function reset() {
-        console.log(this.listing);
         this.svg.selectAll('g.boxplot').remove();
         this.svg
             .selectAll('g.point')
@@ -750,7 +770,6 @@
     function onDraw() {
         //Annotate selected and total number of participants.
         updateParticipantCount(this, '.annote');
-        console.log(this.listing);
         //Reset things.
         reset.call(this);
     }
@@ -958,16 +977,225 @@
             );
     }
 
+    function addSparkLines(d) {
+        var chart = this.chart;
+        var config = this.chart.config;
+
+        if (this.data.raw.length > 0) {
+            //don't try to draw sparklines if the table is empty
+            this.tbody
+                .selectAll('tr')
+                .style('background', 'none')
+                .style('border-bottom', '.5px solid black')
+                .each(function(row_d) {
+                    //Spark line cell
+                    var cell = d3
+                            .select(this)
+                            .select('td.spark')
+                            .classed('minimized', true)
+                            .text(''),
+                        toggle = d3
+                            .select(this)
+                            .select('td.toggle')
+                            .html('&#x25BD;')
+                            .style('cursor', 'pointer')
+                            .style('color', '#999')
+                            .style('vertical-align', 'middle'),
+                        width = 100,
+                        height = 25,
+                        offset = 4,
+                        overTime = row_d.raw.sort(function(a, b) {
+                            return +a[config.visitn_col] - +b[config.visitn_col];
+                        });
+
+                    var x = d3.scale
+                        .linear()
+                        .domain(
+                            d3.extent(overTime, function(m) {
+                                return +m[config.visitn_col];
+                            })
+                        )
+                        .range([offset, width - offset]);
+
+                    //y-domain includes 99th population percentile + any participant outliers
+                    var y = d3.scale
+                        .linear()
+                        .domain(
+                            d3.extent(overTime, function(m) {
+                                return +m[config.value_col];
+                            })
+                        )
+                        .range([height - offset, offset]);
+
+                    //render the svg
+                    var svg = cell
+                        .append('svg')
+                        .attr({
+                            width: width,
+                            height: height
+                        })
+                        .append('g');
+
+                    //draw lines at the population guidelines
+                    /*
+                svg.selectAll('lines.guidelines')
+                    .data(row_d.population_extent)
+                    .enter()
+                    .append('line')
+                    .attr('class', 'guidelines')
+                    .attr('x1', 0)
+                    .attr('x2', width)
+                    .attr('y1', d => y(d))
+                    .attr('y2', d => y(d))
+                    .attr('stroke', '#ccc')
+                    .attr('stroke-dasharray', '2 2');
+                */
+
+                    //draw the sparkline
+                    var draw_sparkline = d3.svg
+                        .line()
+                        .interpolate('linear')
+                        .x(function(d) {
+                            return x(d[config.visitn_col]);
+                        })
+                        .y(function(d) {
+                            return y(d[config.value_col]);
+                        });
+                    var sparkline = svg
+                        .append('path')
+                        .datum(overTime)
+                        .attr({
+                            class: 'sparkLine',
+                            d: draw_sparkline,
+                            fill: 'none',
+                            stroke: '#999'
+                        });
+
+                    //draw baseline values
+
+                    var baseline_circles = svg
+                        .selectAll('circle')
+                        .data(overTime)
+                        .enter()
+                        .append('circle')
+                        .attr('class', 'circle outlier')
+                        .attr('cx', function(d) {
+                            return x(d[config.visitn_col]);
+                        })
+                        .attr('cy', function(d) {
+                            return y(d[config.value_col]);
+                        })
+                        .attr('r', '2px')
+                        .attr('stroke', function(d) {
+                            return d.color;
+                        })
+                        .attr('fill', function(d) {
+                            return d.color;
+                        });
+                });
+        }
+    }
+
+    function formatDelta() {
+        this.tbody
+            .selectAll('tr')
+            .select('td.delta')
+            .text(function(d) {
+                return isNaN(d.delta) ? 'NA' : d3.format('+0.2f')(d.delta);
+            })
+            .style('color', function(d) {
+                return isNaN(d.delta)
+                    ? '#ccc'
+                    : d.delta > 0
+                    ? 'red'
+                    : d.delta < 0
+                    ? 'green'
+                    : '#999';
+            });
+    }
+
+    function addAxisFlag() {
+        var table = this;
+        ['X', 'Y'].forEach(function(axis) {
+            var cell = table.tbody
+                .selectAll('tr')
+                .filter(function(d) {
+                    return d.axisFlag == axis;
+                })
+                .select('td.key')
+                .text('');
+
+            cell.append('span')
+                .attr('class', 'sdd-axisLabel')
+                .text(axis + '-axis');
+
+            cell.append('span').text(function(d) {
+                return d.key;
+            });
+        });
+    }
+
+    function showParticipantDetails(d) {
+        var table = this;
+        var chart = this.chart;
+        var raw = d.raw[0];
+
+        //show detail variables in a ul
+        table.wrap.select('ul.pdd-pt-details').remove();
+        var ul = table.wrap
+            .insert('ul', '*')
+            .attr('class', 'pdd-pt-details')
+            .style('list-style', 'none')
+            .style('padding', '0');
+
+        var lis = ul
+            .selectAll('li')
+            .data(chart.config.details)
+            .enter()
+            .append('li')
+            .style('', 'block')
+            .style('display', 'inline-block')
+            .style('text-align', 'center')
+            .style('padding', '0.5em');
+
+        lis.append('div')
+            .text(function(d) {
+                return d.label;
+            })
+            .attr('div', 'label')
+            .style('font-size', '0.8em');
+
+        lis.append('div')
+            .text(function(d) {
+                return raw[d.value_col];
+            })
+            .attr('div', 'value');
+    }
+
+    function drawMeasureTable(d) {
+        var chart = this;
+        var config = this.config;
+
+        var point_data = d.values.raw[0];
+        chart.listing.wrap.style('display', null);
+        chart.listing.on('draw', function() {
+            showParticipantDetails.call(this, point_data);
+            addSparkLines.call(this);
+            formatDelta.call(this);
+            addAxisFlag.call(this);
+
+            this.thead.style('border-top', '2px solid black');
+        });
+        chart.listing.draw(point_data.measures);
+    }
+
     function addPointClick() {
         var chart = this;
         var config = this.config;
         var points = this.marks[0].circles;
 
         points.on('click', function(d) {
-            var point_data = d.values.raw[0];
-            console.log(point_data);
-            chart.listing.wrap.style('display', null);
-            chart.listing.draw(point_data.measures);
+            drawMeasureTable.call(chart, d);
         });
     }
 
@@ -1043,6 +1271,15 @@
             '#sdd-listing .wc-table th:not(:first-child),' +
                 '#sdd-listing .wc-table td:not(:first-child) {' +
                 '    text-align: right;' +
+                '}',
+            '.sdd-axisLabel{' +
+                'font-size:75%;' +
+                'border-radius:0.25em;' +
+                'padding:.2em .6em .3em;' +
+                'margin-right:0.4em;' +
+                'background-color:#5bc0de;' +
+                'color:white;' +
+                'font-weight:700;' +
                 '}'
         ];
         var style = document.createElement('style');
@@ -1093,6 +1330,7 @@
         );
         listing.init([]);
         chart.listing = listing;
+        listing.chart = chart;
 
         return chart;
     }

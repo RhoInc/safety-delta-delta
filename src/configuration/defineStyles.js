@@ -29,6 +29,15 @@ export default function defineStyles() {
         '#sdd-listing .wc-table th:not(:first-child),' +
             '#sdd-listing .wc-table td:not(:first-child) {' +
             '    text-align: right;' +
+            '}',
+        '.sdd-axisLabel{' +
+            'font-size:75%;' +
+            'border-radius:0.25em;' +
+            'padding:.2em .6em .3em;' +
+            'margin-right:0.4em;' +
+            'background-color:#5bc0de;' +
+            'color:white;' +
+            'font-weight:700;' +
             '}'
     ];
     const style = document.createElement('style');

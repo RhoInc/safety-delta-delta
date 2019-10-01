@@ -1,5 +1,4 @@
 export default function reset() {
-    console.log(this.listing);
     this.svg.selectAll('g.boxplot').remove();
     this.svg
         .selectAll('g.point')
