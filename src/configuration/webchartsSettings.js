@@ -22,7 +22,7 @@ export default function webchartsSettings() {
                     'stroke-width': 0.5,
                     'fill-opacity': 0.8
                 },
-                tooltip: 'Subject ID: [key]\nX Delta: [delta_x]\nY Delta: [delta_y]'
+                tooltip: 'Subject ID: [key]\nX Delta: [delta_x_rounded]\nY Delta: [delta_y_rounded]'
             }
         ],
         gridlines: 'xy',

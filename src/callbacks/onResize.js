@@ -1,13 +1,11 @@
 import addBoxPlots from './onResize/addBoxPlots';
 import updateClipPath from './onResize/updateClipPath';
 import addPointClick from './onResize/addPointClick';
+import addRegressionLine from './onResize/addRegressionLine';
 
 export default function onResize() {
-    //Add univariate box plots to top and right margins.
     addBoxPlots.call(this);
-
-    //fix cut off points
     updateClipPath.call(this);
-
     addPointClick.call(this);
+    if (this.config.addRegressionLine) addRegressionLine.call(this);
 }

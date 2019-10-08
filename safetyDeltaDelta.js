@@ -1,11 +1,14 @@
 (function(global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined'
-        ? (module.exports = factory(require('d3'), require('webcharts')))
+        ? (module.exports = factory(require('d3'), require('regression'), require('webcharts')))
         : typeof define === 'function' && define.amd
-        ? define(['d3', 'webcharts'], factory)
-        : (global.safetyDeltaDelta = factory(global.d3, global.webCharts));
-})(this, function(d3$1, webcharts) {
+        ? define(['d3', 'regression', 'webcharts'], factory)
+        : (global.safetyDeltaDelta = factory(global.d3, global.regression, global.webCharts));
+})(this, function(d3$1, regression, webcharts) {
     'use strict';
+
+    regression =
+        regression && regression.hasOwnProperty('default') ? regression['default'] : regression;
 
     if (typeof Object.assign != 'function') {
         Object.defineProperty(Object, 'assign', {
@@ -157,7 +160,8 @@
             value_col: 'STRESN',
             filters: null,
             measure: { x: null, y: null },
-            visits: { baseline: [], comparison: [], stat: 'mean' }
+            visits: { baseline: [], comparison: [], stat: 'mean' },
+            addRegessionLine: false
         };
     }
 
@@ -185,7 +189,8 @@
                         'stroke-width': 0.5,
                         'fill-opacity': 0.8
                     },
-                    tooltip: 'Subject ID: [key]\nX Delta: [delta_x]\nY Delta: [delta_y]'
+                    tooltip:
+                        'Subject ID: [key]\nX Delta: [delta_x_rounded]\nY Delta: [delta_y_rounded]'
                 }
             ],
             gridlines: 'xy',
@@ -630,7 +635,7 @@
                 measure_obj.raw.forEach(function(dii) {
                     dii.baseline = config.visits.baseline.indexOf(dii[config.visit_col]) > -1;
                     dii.comparison = config.visits.comparison.indexOf(dii[config.visit_col]) > -1;
-                    dii.color = dii.baseline ? 'green' : dii.comparison ? 'orange' : '#999';
+                    dii.color = dii.baseline ? 'blue' : dii.comparison ? 'orange' : '#999';
                 });
 
                 ['baseline', 'comparison'].forEach(function(t) {
@@ -684,6 +689,8 @@
                 });
                 obj.delta_x = obj.x_details.delta;
                 obj.delta_y = obj.y_details.delta;
+                obj.delta_x_rounded = d3.format('0.3f')(obj.delta_x);
+                obj.delta_y_rounded = d3.format('0.3f')(obj.delta_y);
 
                 addParticipantLevelMetadata.call(chart, d, obj);
 
@@ -1090,10 +1097,22 @@
                             return d.color;
                         })
                         .attr('fill', function(d) {
-                            return d.color;
+                            return d.color == '#999' ? 'none' : d.color;
                         });
                 });
         }
+    }
+
+    function addFootnote() {
+        this.wrap.select('span.footnote').remove();
+        this.wrap
+            .append('span')
+            .attr('class', 'footnote')
+            .style('font-size', '0.6em')
+            .style('color', '#999')
+            .text(
+                'This table shows all lab values collected for the selected participant. Filled blue and orange circles indicate baseline and comparison visits respectively - all other visits are draw for reference using with empty gray circles. Change over time values greater than 0 are shown in green; values less than 0 shown in red.'
+            );
     }
 
     function formatDelta() {
@@ -1107,9 +1126,9 @@
                 return isNaN(d.delta)
                     ? '#ccc'
                     : d.delta > 0
-                    ? 'red'
-                    : d.delta < 0
                     ? 'green'
+                    : d.delta < 0
+                    ? 'red'
                     : '#999';
             });
     }
@@ -1178,11 +1197,13 @@
 
         var point_data = d.values.raw[0];
         chart.listing.wrap.style('display', null);
+
         chart.listing.on('draw', function() {
             showParticipantDetails.call(this, point_data);
             addSparkLines.call(this);
             formatDelta.call(this);
             addAxisFlag.call(this);
+            addFootnote.call(this);
 
             this.thead.style('border-top', '2px solid black');
         });
@@ -1195,18 +1216,83 @@
         var points = this.marks[0].circles;
 
         points.on('click', function(d) {
+            points
+                .attr('stroke', function(d) {
+                    return chart.colorScale(d.values.raw[0][config.color_by]);
+                })
+                .attr('stroke-width', 0.5);
+
+            d3.select(this)
+                .attr('stroke-width', 3)
+                .attr('stroke', 'black');
             drawMeasureTable.call(chart, d);
         });
     }
+    //rgb(102,194,165)
+
+    function addRegressionLine() {
+        console.log(this);
+        var chart = this;
+        var config = this.config;
+
+        // map chart data to array and calculate regression using regression-js
+        var arrayData = chart.filtered_data
+            .filter(function(f) {
+                return !isNaN(f.delta_x);
+            })
+            .filter(function(f) {
+                return !isNaN(f.delta_y);
+            })
+            .map(function(d) {
+                return [+d.delta_x, +d.delta_y];
+            });
+
+        var result = regression.linear(arrayData);
+
+        //calculate predicted values for min and max points on the chart
+        var min_x = chart.x_dom[0];
+        var min_xy = result.predict(min_x);
+        var max_x = chart.x_dom[1];
+        var max_xy = result.predict(max_x);
+
+        //draw the regression line
+        var line = d3.svg
+            .line()
+            .x(function(d) {
+                return chart.x(d[0]);
+            })
+            .y(function(d) {
+                return chart.y(d[1]);
+            });
+        chart.svg.selectAll('.regressionLine').remove();
+        chart.svg
+            .append('path')
+            .classed('regressionLine', true)
+            .datum([min_xy, max_xy])
+            .attr('d', line)
+            .attr('stroke', 'black')
+            .attr('stroke-dasharray', '3,5');
+
+        //add footnote with R2 and exact calculation
+        chart.wrap.select('span.regressionNote').remove();
+        chart.wrap
+            .append('span')
+            .attr('class', 'regressionNote')
+            .style('font-size', '0.8em')
+            .style('color', '#999')
+            .html(
+                'The dashed line shows the result of a simple linear regression. Additional details are shown below. <br> Equation: ' +
+                    result.string +
+                    '<br> R<sup>2</sup>: ' +
+                    d3.format('0.2f')(result.r2)
+            );
+    }
 
     function onResize() {
-        //Add univariate box plots to top and right margins.
         addBoxPlots.call(this);
-
-        //fix cut off points
         updateClipPath.call(this);
-
         addPointClick.call(this);
+        if (this.config.addRegressionLine) addRegressionLine.call(this);
     }
 
     function onDestroy() {}
