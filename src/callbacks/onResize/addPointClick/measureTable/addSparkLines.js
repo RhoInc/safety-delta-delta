@@ -93,7 +93,7 @@ export default function addSparkLines(d) {
                     .attr('cy', d => y(d[config.value_col]))
                     .attr('r', '2px')
                     .attr('stroke', d => d.color)
-                    .attr('fill', d => d.color);
+                    .attr('fill', d => (d.color == '#999' ? 'none' : d.color));
             });
     }
 }

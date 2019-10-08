@@ -4,6 +4,6 @@ export default function formatDelta() {
         .select('td.delta')
         .text(d => (isNaN(d.delta) ? 'NA' : d3.format('+0.2f')(d.delta)))
         .style('color', d =>
-            isNaN(d.delta) ? '#ccc' : d.delta > 0 ? 'red' : d.delta < 0 ? 'green' : '#999'
+            isNaN(d.delta) ? '#ccc' : d.delta > 0 ? 'green' : d.delta < 0 ? 'red' : '#999'
         );
 }

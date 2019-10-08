@@ -631,7 +631,7 @@
                 measure_obj.raw.forEach(function(dii) {
                     dii.baseline = config.visits.baseline.indexOf(dii[config.visit_col]) > -1;
                     dii.comparison = config.visits.comparison.indexOf(dii[config.visit_col]) > -1;
-                    dii.color = dii.baseline ? 'green' : dii.comparison ? 'orange' : '#999';
+                    dii.color = dii.baseline ? 'blue' : dii.comparison ? 'orange' : '#999';
                 });
 
                 ['baseline', 'comparison'].forEach(function(t) {
@@ -1093,10 +1093,22 @@
                             return d.color;
                         })
                         .attr('fill', function(d) {
-                            return d.color;
+                            return d.color == '#999' ? 'none' : d.color;
                         });
                 });
         }
+    }
+
+    function addFootnote() {
+        this.wrap.select('span.footnote').remove();
+        this.wrap
+            .append('span')
+            .attr('class', 'footnote')
+            .style('font-size', '0.6em')
+            .style('color', '#999')
+            .text(
+                'This table shows all lab values collected for the selected participant. Filled blue and orange circles indicate baseline and comparison visits respectively - all other visits are draw for reference using with empty gray circles. Change over time values greater than 0 are shown in green; values less than 0 shown in red.'
+            );
     }
 
     function formatDelta() {
@@ -1110,9 +1122,9 @@
                 return isNaN(d.delta)
                     ? '#ccc'
                     : d.delta > 0
-                    ? 'red'
-                    : d.delta < 0
                     ? 'green'
+                    : d.delta < 0
+                    ? 'red'
                     : '#999';
             });
     }
@@ -1181,11 +1193,13 @@
 
         var point_data = d.values.raw[0];
         chart.listing.wrap.style('display', null);
+
         chart.listing.on('draw', function() {
             showParticipantDetails.call(this, point_data);
             addSparkLines.call(this);
             formatDelta.call(this);
             addAxisFlag.call(this);
+            addFootnote.call(this);
 
             this.thead.style('border-top', '2px solid black');
         });

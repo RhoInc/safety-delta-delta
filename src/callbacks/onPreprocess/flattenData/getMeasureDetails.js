@@ -18,7 +18,7 @@ export default function getMeasureDetails(pt_data) {
             measure_obj.raw.forEach(function(dii) {
                 dii.baseline = config.visits.baseline.indexOf(dii[config.visit_col]) > -1;
                 dii.comparison = config.visits.comparison.indexOf(dii[config.visit_col]) > -1;
-                dii.color = dii.baseline ? 'green' : dii.comparison ? 'orange' : '#999';
+                dii.color = dii.baseline ? 'blue' : dii.comparison ? 'orange' : '#999';
             });
 
             ['baseline', 'comparison'].forEach(function(t) {
