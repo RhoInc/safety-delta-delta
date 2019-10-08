@@ -7,6 +7,7 @@ export default function rendererSettings() {
         value_col: 'STRESN',
         filters: null,
         measure: { x: null, y: null },
-        visits: { baseline: [], comparison: [], stat: 'mean' }
+        visits: { baseline: [], comparison: [], stat: 'mean' },
+        addRegessionLine: false
     };
 }

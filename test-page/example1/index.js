@@ -6,7 +6,8 @@ const settings =   {
       normal_col_high: 'LBSTNRHI',
       visit_col: 'VISIT',
       visitn_col: 'VISITNUM',
-      visits: { baseline: [], comparison: ["WEEK 26"], stat: 'mean' }
+      visits: { baseline: [], comparison: ["WEEK 26"], stat: 'mean' },
+      addRegressionLine:true
     //  group_cols: 'ARM',
   }
 const chart = safetyDeltaDelta('#container', settings);

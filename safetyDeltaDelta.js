@@ -1,11 +1,14 @@
 (function(global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined'
-        ? (module.exports = factory(require('d3'), require('webcharts')))
+        ? (module.exports = factory(require('d3'), require('regression'), require('webcharts')))
         : typeof define === 'function' && define.amd
-        ? define(['d3', 'webcharts'], factory)
-        : (global.safetyDeltaDelta = factory(global.d3, global.webCharts));
-})(this, function(d3$1, webcharts) {
+        ? define(['d3', 'regression', 'webcharts'], factory)
+        : (global.safetyDeltaDelta = factory(global.d3, global.regression, global.webCharts));
+})(this, function(d3$1, regression, webcharts) {
     'use strict';
+
+    regression =
+        regression && regression.hasOwnProperty('default') ? regression['default'] : regression;
 
     if (typeof Object.assign != 'function') {
         Object.defineProperty(Object, 'assign', {
@@ -157,7 +160,8 @@
             value_col: 'STRESN',
             filters: null,
             measure: { x: null, y: null },
-            visits: { baseline: [], comparison: [], stat: 'mean' }
+            visits: { baseline: [], comparison: [], stat: 'mean' },
+            addRegessionLine: false
         };
     }
 
@@ -1226,14 +1230,69 @@
     }
     //rgb(102,194,165)
 
+    function addRegressionLine() {
+        console.log(this);
+        var chart = this;
+        var config = this.config;
+
+        // map chart data to array and calculate regression using regression-js
+        var arrayData = chart.filtered_data
+            .filter(function(f) {
+                return !isNaN(f.delta_x);
+            })
+            .filter(function(f) {
+                return !isNaN(f.delta_y);
+            })
+            .map(function(d) {
+                return [+d.delta_x, +d.delta_y];
+            });
+
+        var result = regression.linear(arrayData);
+
+        //calculate predicted values for min and max points on the chart
+        var min_x = chart.x_dom[0];
+        var min_xy = result.predict(min_x);
+        var max_x = chart.x_dom[1];
+        var max_xy = result.predict(max_x);
+
+        //draw the regression line
+        var line = d3.svg
+            .line()
+            .x(function(d) {
+                return chart.x(d[0]);
+            })
+            .y(function(d) {
+                return chart.y(d[1]);
+            });
+        chart.svg.selectAll('.regressionLine').remove();
+        chart.svg
+            .append('path')
+            .classed('regressionLine', true)
+            .datum([min_xy, max_xy])
+            .attr('d', line)
+            .attr('stroke', 'black')
+            .attr('stroke-dasharray', '3,5');
+
+        //add footnote with R2 and exact calculation
+        chart.wrap.select('span.regressionNote').remove();
+        chart.wrap
+            .append('span')
+            .attr('class', 'regressionNote')
+            .style('font-size', '0.8em')
+            .style('color', '#999')
+            .html(
+                'The dashed line shows the result of a simple linear regression. Additional details are shown below. <br> Equation: ' +
+                    result.string +
+                    '<br> R<sup>2</sup>: ' +
+                    d3.format('0.2f')(result.r2)
+            );
+    }
+
     function onResize() {
-        //Add univariate box plots to top and right margins.
         addBoxPlots.call(this);
-
-        //fix cut off points
         updateClipPath.call(this);
-
         addPointClick.call(this);
+        if (this.config.addRegressionLine) addRegressionLine.call(this);
     }
 
     function onDestroy() {}
