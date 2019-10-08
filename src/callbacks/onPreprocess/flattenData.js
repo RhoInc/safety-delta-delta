@@ -19,6 +19,8 @@ export default function flattenData(rawData) {
             obj.y_details = obj.measures.find(f => f.key == config.measure.y);
             obj.delta_x = obj.x_details.delta;
             obj.delta_y = obj.y_details.delta;
+            obj.delta_x_rounded = d3.format('0.3f')(obj.delta_x);
+            obj.delta_y_rounded = d3.format('0.3f')(obj.delta_y);
 
             addParticipantLevelMetadata.call(chart, d, obj);
 

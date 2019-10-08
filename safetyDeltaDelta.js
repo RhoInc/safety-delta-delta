@@ -185,7 +185,8 @@
                         'stroke-width': 0.5,
                         'fill-opacity': 0.8
                     },
-                    tooltip: 'Subject ID: [key]\nX Delta: [delta_x]\nY Delta: [delta_y]'
+                    tooltip:
+                        'Subject ID: [key]\nX Delta: [delta_x_rounded]\nY Delta: [delta_y_rounded]'
                 }
             ],
             gridlines: 'xy',
@@ -684,6 +685,8 @@
                 });
                 obj.delta_x = obj.x_details.delta;
                 obj.delta_y = obj.y_details.delta;
+                obj.delta_x_rounded = d3.format('0.3f')(obj.delta_x);
+                obj.delta_y_rounded = d3.format('0.3f')(obj.delta_y);
 
                 addParticipantLevelMetadata.call(chart, d, obj);
 
