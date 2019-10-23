@@ -1,9 +1,9 @@
-The most straightforward way to customize the Safety Histogram is by using a configuration object whose properties describe the behavior and appearance of the chart. Since the Safety Histogram is a Webcharts `chart` object, many default Webcharts settings are set in the [webchartsSettings.js file](https://github.com/RhoInc/safety-outlier-explorer/blob/master/src/configuration/webchartsSettings.js) as [described below](#webcharts-settings). Refer to the [Webcharts documentation](https://github.com/RhoInc/Webcharts/wiki/Chart-Configuration) for more details on these settings.
+The most straightforward way to customize the Safety Delta-Delta plot is by using a configuration object whose properties describe the behavior and appearance of the chart. Since the Safety Histogram is a Webcharts `chart` object, many default Webcharts settings are set in the [webchartsSettings.js file](https://github.com/RhoInc/safety-delta-delta/blob/master/src/configuration/webchartsSettings.js) as [described below](#webcharts-settings). Refer to the [Webcharts documentation](https://github.com/RhoInc/Webcharts/wiki/Chart-Configuration) for more details on these settings.
 
-In addition to the standard Webcharts settings several custom settings not available in the base Webcharts library have been added to the Safety Histogram to facilitate data mapping and other custom functionality. These custom settings are described in detail below. All defaults can be overwritten by users.
+In addition to the standard Webcharts settings several custom settings not available in the base Webcharts library have been added to the Safety Delta-Delta plot to facilitate data mapping and other custom functionality. These custom settings are described in detail below. All defaults can be overwritten by users.
 
 # Renderer-specific settings
-The sections below describe each safety-histogram setting as of version 2.3.0.
+The sections below describe each safety-delta-delta setting as of version 1.0.0.
 
 ## settings.measure_col
 `string`
@@ -32,30 +32,72 @@ a variable that contains IDs for each participant
 
 
 
-## settings.unit_col
+## settings.visit_col
 `string`
 
-a variable that contains the units of each medical sign
+a variable that contains the categorical visit where the measure was collected
 
-**default:** `"STRESU"`
+**default:** `"VISIT"`
 
 
 
-## settings.normal_col_low
+## settings.visitn_col
 `string`
 
-a variable that contains the lower limit of normal of the medical sign
+a variable that contains the numeric visit where the measure was collected
 
-**default:** `"STNRLO"`
+**default:** `"VISITN"`
 
 
 
-## settings.normal_col_high
+## settings.measure
+`object`
+
+Measures to be used in delta-delta scatter plot. Must be a value of the `settings.measure_value` column
+
+### settings.measure.x
 `string`
 
-a variable that contains the upper limit of normal of the medical sign
+Measure to be shown on the x-axis of the delta-delta plot
 
-**default:** `"STNRHI"`
+**default:** none
+
+### settings.measure.y
+`string`
+
+Measure to be shown on the y-axis of the delta-delta plot
+
+**default:** none
+
+
+
+## settings.addRegressionLine
+`boolean`
+
+Indicates whether a regression line should be drawn on the delta-delta scatter plot
+
+**default:** `false`
+
+
+
+## settings.visits
+`object`
+
+
+
+### settings.visits.x
+`string`
+
+Measure to be shown on the x-axis of the delta-delta plot
+
+**default:** none
+
+### settings.visits.y
+`string`
+
+Measure to be shown on the y-axis of the delta-delta plot
+
+**default:** none
 
 
 
@@ -105,71 +147,43 @@ the name of the variable
 
 
 
-## settings.start_value
-`string`
-
-the name of the initially displayed medical sign; defaults to the first measure in the data
-
-**default:** none
-
-
-
-## settings.normal_range
-`boolean`
-
-a boolean that dictates whether the normal range control will be generated
-
-**default:** `true`
-
-
-
-## settings.displayNormalRange
-`boolean`
-
-a boolean that dictates whether the normal range will be displayed initially
-
-**default:** `false`
-
-
-
 # Webcharts settings
-The object below contains Webcharts settings that define the safety-histogram chart as of version 2.3.0 of the Safety Histogram.
+The object below contains Webcharts settings that define the safety-histogram chart as of version 1.0.0 of the Safety Delta Delta.
 
 ```
 {
     "x": {
-        "type": "linear",
         "column": null,
-        "label": null,
-        "domain": [
-            null,
-            null
-        ],
-        "format": null,
-        "bin": null
+        "type": "linear",
+        "label": "x delta",
+        "format": "0.2f"
     },
     "y": {
-        "type": "linear",
         "column": null,
-        "label": "# of Observations",
-        "domain": [
-            0,
-            null
-        ],
-        "format": "1d",
-        "behavior": "flex"
+        "type": "linear",
+        "label": "y delta",
+        "behavior": "flex",
+        "format": "0.2f"
     },
     "marks": [
         {
-            "per": [],
-            "type": "bar",
-            "summarizeX": "mean",
-            "summarizeY": "count",
+            "type": "circle",
+            "per": null,
+            "radius": 4,
             "attributes": {
-                "fill-opacity": 0.75
-            }
+                "stroke-width": 0.5,
+                "fill-opacity": 0.8
+            },
+            "tooltip": "Subject ID: [key]\nX Delta: [delta_x_rounded]\nY Delta: [delta_y_rounded]"
         }
     ],
-    "aspect": 3
+    "gridlines": "xy",
+    "resizable": false,
+    "margin": {
+        "right": 25,
+        "top": 25
+    },
+    "aspect": 1,
+    "width": 400
 }
 ```
