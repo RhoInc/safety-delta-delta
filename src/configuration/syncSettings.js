@@ -22,13 +22,6 @@ export default function syncSettings(settings) {
                         : filter
                 })
             );
-    if (settings.normal_col_low)
-        defaultDetails.push({ value_col: settings.normal_col_low, label: 'Lower Limit of Normal' });
-    if (settings.normal_col_high)
-        defaultDetails.push({
-            value_col: settings.normal_col_high,
-            label: 'Upper Limit of Normal'
-        });
 
     //If [settings.details] is not specified:
     if (!settings.details) settings.details = defaultDetails;
