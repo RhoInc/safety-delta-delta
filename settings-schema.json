@@ -44,10 +44,10 @@
       "required": true
     },
     "visitn_col": {
-      "title": "Visit",
+      "title": "Visit (Numeric)",
       "description": "a variable that contains the numeric visit where the measure was collected",
       "type": "string",
-      "default": "VISIT",
+      "default": "VISITN",
       "data-mapping": true,
       "data-type": "character",
       "required": true
