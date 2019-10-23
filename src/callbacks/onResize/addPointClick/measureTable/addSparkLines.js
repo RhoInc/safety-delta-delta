@@ -50,21 +50,6 @@ export default function addSparkLines(d) {
                     })
                     .append('g');
 
-                //draw lines at the population guidelines
-                /*
-                svg.selectAll('lines.guidelines')
-                    .data(row_d.population_extent)
-                    .enter()
-                    .append('line')
-                    .attr('class', 'guidelines')
-                    .attr('x1', 0)
-                    .attr('x2', width)
-                    .attr('y1', d => y(d))
-                    .attr('y2', d => y(d))
-                    .attr('stroke', '#ccc')
-                    .attr('stroke-dasharray', '2 2');
-                */
-
                 //draw the sparkline
                 var draw_sparkline = d3.svg
                     .line()
@@ -83,7 +68,7 @@ export default function addSparkLines(d) {
 
                 //draw baseline values
 
-                var baseline_circles = svg
+                var circles = svg
                     .selectAll('circle')
                     .data(overTime)
                     .enter()
@@ -93,7 +78,13 @@ export default function addSparkLines(d) {
                     .attr('cy', d => y(d[config.value_col]))
                     .attr('r', '2px')
                     .attr('stroke', d => d.color)
-                    .attr('fill', d => (d.color == '#999' ? 'none' : d.color));
+                    .attr('fill', d => (d.color == '#999' ? 'transparent' : d.color))
+                    .append('title')
+                    .text(function(d) {
+                        return (
+                            'Value = ' + d[config.value_col] + ' @ Visit ' + d[config.visitn_col]
+                        );
+                    });
             });
     }
 }
