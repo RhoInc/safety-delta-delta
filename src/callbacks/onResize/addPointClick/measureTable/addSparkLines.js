@@ -1,3 +1,5 @@
+import { select, scale, extent, svg } from 'd3';
+
 export default function addSparkLines(d) {
     var table = this;
     var chart = this.chart;
@@ -11,13 +13,11 @@ export default function addSparkLines(d) {
             .style('border-bottom', '.5px solid black')
             .each(function(row_d) {
                 //Spark line cell
-                const cell = d3
-                        .select(this)
+                const cell = select(this)
                         .select('td.spark')
                         .classed('minimized', true)
                         .text(''),
-                    toggle = d3
-                        .select(this)
+                    toggle = select(this)
                         .select('td.toggle')
                         .html('&#x25BD;')
                         .style('cursor', 'pointer')
@@ -30,15 +30,15 @@ export default function addSparkLines(d) {
                         (a, b) => +a[config.visitn_col] - +b[config.visitn_col]
                     );
 
-                var x = d3.scale
+                var x = scale
                     .linear()
-                    .domain(d3.extent(overTime, m => +m[config.visitn_col]))
+                    .domain(extent(overTime, m => +m[config.visitn_col]))
                     .range([offset, width - offset]);
 
                 //y-domain includes 99th population percentile + any participant outliers
-                var y = d3.scale
+                var y = scale
                     .linear()
-                    .domain(d3.extent(overTime, m => +m[config.value_col]))
+                    .domain(extent(overTime, m => +m[config.value_col]))
                     .range([height - offset, offset]);
 
                 //render the svg
@@ -51,7 +51,7 @@ export default function addSparkLines(d) {
                     .append('g');
 
                 //draw the sparkline
-                var draw_sparkline = d3.svg
+                var draw_sparkline = svg
                     .line()
                     .interpolate('linear')
                     .x(d => x(d[config.visitn_col]))

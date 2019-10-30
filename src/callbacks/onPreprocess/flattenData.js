@@ -1,4 +1,4 @@
-import { nest, sum, merge, max, min, format } from 'd3';
+import { nest, format } from 'd3';
 import addParticipantLevelMetadata from './flattenData/addParticipantLevelMetadata';
 import getMeasureDetails from './flattenData/getMeasureDetails';
 
@@ -19,8 +19,8 @@ export default function flattenData(rawData) {
             obj.y_details = obj.measures.find(f => f.key == config.measure.y);
             obj.delta_x = obj.x_details.delta;
             obj.delta_y = obj.y_details.delta;
-            obj.delta_x_rounded = d3.format('0.3f')(obj.delta_x);
-            obj.delta_y_rounded = d3.format('0.3f')(obj.delta_y);
+            obj.delta_x_rounded = format('0.3f')(obj.delta_x);
+            obj.delta_y_rounded = format('0.3f')(obj.delta_y);
 
             addParticipantLevelMetadata.call(chart, d, obj);
 
