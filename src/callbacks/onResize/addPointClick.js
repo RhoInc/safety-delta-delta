@@ -17,4 +17,3 @@ export default function addPointClick() {
         drawMeasureTable.call(chart, d);
     });
 }
-//rgb(102,194,165)

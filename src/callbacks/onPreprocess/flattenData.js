@@ -24,14 +24,6 @@ export default function flattenData(rawData) {
             return obj;
         })
         .entries(rawData);
-    console.log(
-        nested
-            //.filter(d => d.values.x_details === undefined || d.values.y_details === undefined)
-            .filter(d => (
-                (d.values.x_details.baseline_value === undefined || d.values.x_details.comparison_value === undefined) ||
-                (d.values.y_details.baseline_value === undefined || d.values.y_details.comparison_value === undefined)
-            ))
-    );
 
     return nested.map(m => m.values);
 }

@@ -16,6 +16,6 @@ export default function rendererSettings() {
             comparison: [],
             stat: 'mean'
         },
-        addRegressionLine: true
+        add_regression_line: true
     };
 }

@@ -2,7 +2,7 @@ import regression from 'regression';
 import { svg, format } from 'd3';
 
 export default function addRegressionLine() {
-    if (this.config.addRegressionLine) {
+    if (this.config.add_regression_line) {
         var chart = this;
         var config = this.config;
 
@@ -35,12 +35,10 @@ export default function addRegressionLine() {
             .attr('stroke-dasharray', '3,5');
 
         //add footnote with R2 and exact calculation
-        chart.wrap.select('span.regressionNote').remove();
+        chart.wrap.select('span.regression-note').remove();
         chart.wrap
             .append('span')
-            .attr('class', 'regressionNote')
-            .style('font-size', '0.8em')
-            .style('color', '#999')
+            .classed('regression-note', true)
             .html(
                 'The dashed line shows the result of a simple linear regression. Additional details are shown below. <br> Equation: ' +
                     result.string +
