@@ -3,30 +3,35 @@ import addParticipantLevelMetadata from './flattenData/addParticipantLevelMetada
 import getMeasureDetails from './flattenData/getMeasureDetails';
 
 export default function flattenData(rawData) {
-    var chart = this;
-    var config = this.config;
-
-    var nested = nest()
-        .key(function(d) {
-            return d[config.id_col];
-        })
-        .rollup(function(d) {
-            var obj = {};
-            obj.key = d[0][config.id_col];
+    const nested = nest()
+        .key(d => d[this.config.id_col])
+        .rollup(d => {
+            const obj = {};
+            obj.key = d[0][this.config.id_col];
             obj.raw = d;
-            obj.measures = getMeasureDetails.call(chart, d);
-            obj.x_details = obj.measures.find(f => f.key == config.measure.x);
-            obj.y_details = obj.measures.find(f => f.key == config.measure.y);
-            obj.delta_x = obj.x_details.delta;
-            obj.delta_y = obj.y_details.delta;
-            obj.delta_x_rounded = format('0.3f')(obj.delta_x);
-            obj.delta_y_rounded = format('0.3f')(obj.delta_y);
+            obj.measures = getMeasureDetails.call(this, d);
 
-            addParticipantLevelMetadata.call(chart, d, obj);
+            obj.x_details = obj.measures.find(f => f.key == this.config.measure.x);
+            obj.delta_x = obj.x_details ? obj.x_details.delta : null;
+            obj.delta_x_rounded = obj.x_details ? format('0.3f')(obj.delta_x) : '';
+
+            obj.y_details = obj.measures.find(f => f.key == this.config.measure.y);
+            obj.delta_y = obj.y_details ? obj.y_details.delta : null;
+            obj.delta_y_rounded = obj.y_details ? format('0.3f')(obj.delta_y) : '';
+
+            addParticipantLevelMetadata.call(this, d, obj);
 
             return obj;
         })
         .entries(rawData);
+    console.log(
+        nested
+            //.filter(d => d.values.x_details === undefined || d.values.y_details === undefined)
+            .filter(d => (
+                (d.values.x_details.baseline_value === undefined || d.values.x_details.comparison_value === undefined) ||
+                (d.values.y_details.baseline_value === undefined || d.values.y_details.comparison_value === undefined)
+            ))
+    );
 
     return nested.map(m => m.values);
 }

@@ -153,9 +153,16 @@
             value_col: 'STRESN',
             filters: null,
             details: null,
-            measure: { x: null, y: null },
-            visits: { baseline: [], comparison: [], stat: 'mean' },
-            addRegressionLine: false
+            measure: {
+                x: null,
+                y: null
+            },
+            visits: {
+                baseline: [],
+                comparison: [],
+                stat: 'mean'
+            },
+            addRegressionLine: true
         };
     }
 
@@ -535,31 +542,37 @@
     }
 
     function flattenData(rawData) {
-        var chart = this;
-        var config = this.config;
+        var _this = this;
 
         var nested = d3.nest().key(function (d) {
-            return d[config.id_col];
+            return d[_this.config.id_col];
         }).rollup(function (d) {
             var obj = {};
-            obj.key = d[0][config.id_col];
+            obj.key = d[0][_this.config.id_col];
             obj.raw = d;
-            obj.measures = getMeasureDetails.call(chart, d);
-            obj.x_details = obj.measures.find(function (f) {
-                return f.key == config.measure.x;
-            });
-            obj.y_details = obj.measures.find(function (f) {
-                return f.key == config.measure.y;
-            });
-            obj.delta_x = obj.x_details.delta;
-            obj.delta_y = obj.y_details.delta;
-            obj.delta_x_rounded = d3.format('0.3f')(obj.delta_x);
-            obj.delta_y_rounded = d3.format('0.3f')(obj.delta_y);
+            obj.measures = getMeasureDetails.call(_this, d);
 
-            addParticipantLevelMetadata.call(chart, d, obj);
+            obj.x_details = obj.measures.find(function (f) {
+                return f.key == _this.config.measure.x;
+            });
+            obj.delta_x = obj.x_details ? obj.x_details.delta : null;
+            obj.delta_x_rounded = obj.x_details ? d3.format('0.3f')(obj.delta_x) : '';
+
+            obj.y_details = obj.measures.find(function (f) {
+                return f.key == _this.config.measure.y;
+            });
+            obj.delta_y = obj.y_details ? obj.y_details.delta : null;
+            obj.delta_y_rounded = obj.y_details ? d3.format('0.3f')(obj.delta_y) : '';
+
+            addParticipantLevelMetadata.call(_this, d, obj);
 
             return obj;
         }).entries(rawData);
+        console.log(nested
+        //.filter(d => d.values.x_details === undefined || d.values.y_details === undefined)
+        .filter(function (d) {
+            return d.values.x_details.baseline_value === undefined || d.values.x_details.comparison_value === undefined || d.values.y_details.baseline_value === undefined || d.values.y_details.comparison_value === undefined;
+        }));
 
         return nested.map(function (m) {
             return m.values;
@@ -760,18 +773,18 @@
                 })).range([height - offset, offset]);
 
                 //render the svg
-                var svg = cell.append('svg').attr({
+                var canvas = cell.append('svg').attr({
                     width: width,
                     height: height
                 }).append('g');
 
                 //draw the sparkline
-                var draw_sparkline = svg.line().interpolate('linear').x(function (d) {
+                var draw_sparkline = d3.svg.line().interpolate('linear').x(function (d) {
                     return x(d[config.visitn_col]);
                 }).y(function (d) {
                     return y(d[config.value_col]);
                 });
-                var sparkline = svg.append('path').datum(overTime).attr({
+                var sparkline = canvas.append('path').datum(overTime).attr({
                     class: 'sparkLine',
                     d: draw_sparkline,
                     fill: 'none',
@@ -780,7 +793,7 @@
 
                 //draw baseline values
 
-                var circles = svg.selectAll('circle').data(overTime).enter().append('circle').attr('class', 'circle outlier').attr('cx', function (d) {
+                var circles = canvas.selectAll('circle').data(overTime).enter().append('circle').attr('class', 'circle outlier').attr('cx', function (d) {
                     return x(d[config.visitn_col]);
                 }).attr('cy', function (d) {
                     return y(d[config.value_col]);

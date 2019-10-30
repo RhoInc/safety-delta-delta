@@ -42,7 +42,7 @@ export default function addSparkLines(d) {
                     .range([height - offset, offset]);
 
                 //render the svg
-                var svg = cell
+                var canvas = cell
                     .append('svg')
                     .attr({
                         width: width,
@@ -56,7 +56,7 @@ export default function addSparkLines(d) {
                     .interpolate('linear')
                     .x(d => x(d[config.visitn_col]))
                     .y(d => y(d[config.value_col]));
-                var sparkline = svg
+                var sparkline = canvas
                     .append('path')
                     .datum(overTime)
                     .attr({
@@ -68,7 +68,7 @@ export default function addSparkLines(d) {
 
                 //draw baseline values
 
-                var circles = svg
+                var circles = canvas
                     .selectAll('circle')
                     .data(overTime)
                     .enter()
