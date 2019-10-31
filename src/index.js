@@ -5,13 +5,13 @@ import { createChart, createControls, createTable } from 'webcharts';
 import callbacks from './callbacks/index';
 
 //layout and styles
-import defineLayout from './configuration/defineLayout';
-import defineStyles from './configuration/defineStyles';
+import layout from './layout';
+import styles from './styles';
 
 export default function safetyDeltaDelta(element = 'body', settings = {}) {
     //layout and styles
-    defineLayout(element);
-    defineStyles();
+    layout(element);
+    styles();
 
     //Define chart.
     const mergedSettings = Object.assign(
@@ -46,6 +46,7 @@ export default function safetyDeltaDelta(element = 'body', settings = {}) {
         document.querySelector(element).querySelector('#sdd-listing'),
         configuration.listingSettings()
     );
+    listing.wrap.style('display', 'none'); // empty table's popping up briefly
     listing.init([]);
     chart.listing = listing;
     listing.chart = chart;

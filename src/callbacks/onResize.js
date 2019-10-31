@@ -7,5 +7,5 @@ export default function onResize() {
     addBoxPlots.call(this);
     updateClipPath.call(this);
     addPointClick.call(this);
-    if (this.config.addRegressionLine) addRegressionLine.call(this);
+    addRegressionLine.call(this);
 }

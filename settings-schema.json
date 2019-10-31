@@ -69,7 +69,7 @@
         }
       }
     },
-    "addRegressionLine": {
+    "add_regression_line": {
       "title": "Add Regression Line",
       "description": "Indicates whether a regression line should be drawn on the delta-delta scatter plot",
       "type": "boolean",

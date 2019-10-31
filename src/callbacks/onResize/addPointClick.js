@@ -1,3 +1,4 @@
+import { select } from 'd3';
 import drawMeasureTable from './addPointClick/measureTable/drawMeasureTable';
 
 export default function addPointClick() {
@@ -10,10 +11,9 @@ export default function addPointClick() {
             .attr('stroke', d => chart.colorScale(d.values.raw[0][config.color_by]))
             .attr('stroke-width', 0.5);
 
-        d3.select(this)
+        select(this)
             .attr('stroke-width', 3)
             .attr('stroke', 'black');
         drawMeasureTable.call(chart, d);
     });
 }
-//rgb(102,194,165)

@@ -1,7 +1,8 @@
+import { nest, mean } from 'd3';
+
 export default function getMeasureDetails(pt_data) {
     var config = this.config;
-    var measure_details = d3
-        .nest()
+    var measure_details = nest()
         .key(d => d[config.measure_col])
         .rollup(function(di) {
             var measure_obj = {};
@@ -26,7 +27,7 @@ export default function getMeasureDetails(pt_data) {
                     f => config.visits[t].indexOf(f[config.visit_col]) > -1
                 );
 
-                measure_obj[t + '_value'] = d3.mean(
+                measure_obj[t + '_value'] = mean(
                     measure_obj[t + '_records'],
                     d => d[config.value_col]
                 );
