@@ -680,13 +680,13 @@
                     return f.key == _this.config.measure.x;
                 });
                 obj.delta_x = obj.x_details ? obj.x_details.delta : null;
-                obj.delta_x_rounded = obj.x_details ? d3.format('0.3f')(obj.delta_x) : '';
+                obj.delta_x_rounded = obj.x_details ? d3.format('0.2f')(obj.delta_x) : '';
 
                 obj.y_details = obj.measures.find(function(f) {
                     return f.key == _this.config.measure.y;
                 });
                 obj.delta_y = obj.y_details ? obj.y_details.delta : null;
-                obj.delta_y_rounded = obj.y_details ? d3.format('0.3f')(obj.delta_y) : '';
+                obj.delta_y_rounded = obj.y_details ? d3.format('0.2f')(obj.delta_y) : '';
 
                 addParticipantLevelMetadata.call(_this, d, obj);
 
