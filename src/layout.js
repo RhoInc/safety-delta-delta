@@ -1,6 +1,6 @@
 import { select } from 'd3';
 
-export default function defineLayout(element) {
+export default function layout(element) {
     const container = select(element);
     container
         .append('div')

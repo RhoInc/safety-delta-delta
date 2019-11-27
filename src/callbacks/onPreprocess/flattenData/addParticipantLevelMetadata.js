@@ -1,22 +1,24 @@
+import { merge } from 'd3';
+
 export default function addParticipantLevelMetadata(d, participant_obj) {
     let varList = [];
     if (this.config.filters) {
         const filterVars = this.config.filters.map(d =>
             d.hasOwnProperty('value_col') ? d.value_col : d
         );
-        varList = d3.merge([varList, filterVars]);
+        varList = merge([varList, filterVars]);
     }
     if (this.config.group_cols) {
         const groupVars = this.config.group_cols.map(d =>
             d.hasOwnProperty('value_col') ? d.value_col : d
         );
-        varList = d3.merge([varList, groupVars]);
+        varList = merge([varList, groupVars]);
     }
     if (this.config.details) {
         const detailVars = this.config.details.map(d =>
             d.hasOwnProperty('value_col') ? d.value_col : d
         );
-        varList = d3.merge([varList, detailVars]);
+        varList = merge([varList, detailVars]);
     }
 
     varList.forEach(function(v) {

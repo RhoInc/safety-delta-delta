@@ -1,4 +1,4 @@
-export default function defineStyles() {
+export default function styles() {
     const styles = [
         '#safety-delta-delta {' + '    width: 100%;' + '    display: inline-block;' + '}',
         '.sdd-component {' +
@@ -22,6 +22,12 @@ export default function defineStyles() {
 
         //chart
         '#sdd-chart {' + '    width: 36%;' + '    margin: 0 2%;' + '}',
+        '.wc-data-mark {' + '    cursor: pointer;' + '}',
+        '.wc-data-mark:hover {' + '    stroke: black;' + '    stroke-width: 3;' + '}',
+        '.regression-note {' +
+            //'    font-size: 0.8em;' +
+            '    color: #999;' +
+            '}',
 
         //listing
         '#sdd-listing {' + '    width: 35%;' + '    float: right;' + '}',

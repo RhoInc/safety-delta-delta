@@ -1,5 +1,7 @@
 import json from 'rollup-plugin-json';
 import babel from 'rollup-plugin-babel';
+import nodeResolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
 
 var pkg = require('./package.json');
 
@@ -22,9 +24,10 @@ module.exports = {
         },
     },
     external: (function() {
-        var dependencies = pkg.dependencies;
+        var dependencies = Object.keys(pkg.dependencies)
+            .filter(dependency => dependency !== 'regression');
 
-        return Object.keys(dependencies);
+        return dependencies;
     }()),
     plugins: [
         json({
@@ -40,6 +43,8 @@ module.exports = {
             ],
             babelrc: false
         }),
+        nodeResolve(),
+        commonjs(),
     ]
 };
 
