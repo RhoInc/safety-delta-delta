@@ -1,7 +1,7 @@
 {
   "name": "safety-delta-delta",
   "description": "Chart for exploring changes over time across multiple measures in clinical trial safety data",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Rho, Inc.",
   "license": "MIT",
   "homepage": "https://github.com/rhoinc/safety-delta-delta#readme",
